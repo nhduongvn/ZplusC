@@ -1,0 +1,5 @@
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//TT_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1_2016-04_1of5.root
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//TT_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1_2016-04_2of5.root
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//TT_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1_2016-04_3of5.root
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//TT_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1_2016-04_4of5.root
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//TT_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1_2016-04_5of5.root

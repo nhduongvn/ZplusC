@@ -1,0 +1,7 @@
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//SingleMuon_Run2015C_25ns-16Dec2015-v1_2016-04.root
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//SingleMuon_Run2015D-16Dec2015-v1_2016-04_1of6.root
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//SingleMuon_Run2015D-16Dec2015-v1_2016-04_2of6.root
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//SingleMuon_Run2015D-16Dec2015-v1_2016-04_3of6.root
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//SingleMuon_Run2015D-16Dec2015-v1_2016-04_4of6.root
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//SingleMuon_Run2015D-16Dec2015-v1_2016-04_5of6.root
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//SingleMuon_Run2015D-16Dec2015-v1_2016-04_6of6.root

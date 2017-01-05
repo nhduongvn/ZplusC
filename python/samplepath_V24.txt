@@ -1,0 +1,8 @@
+root://cmseos.fnal.gov/store/user/lpcphys/noreplica/duong/VHbbTuples/Data_2016_1/SingleMuon ZC2016_11_Run2016_promptReco_3_SingleMuon__Run2016C-PromptReco-v2 
+root://cmseos.fnal.gov/store/user/lpcphys/noreplica/duong/VHbbTuples/Data_2016_1/SingleMuon ZC2016_11_Run2016_promptReco_3_SingleMuon__Run2016D-PromptReco-v2 
+root://cmseos.fnal.gov/store/user/yokugawa/ZC_2016_no2/ DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8
+root://cmseos.fnal.gov/store/user/yokugawa/ZC_2016_no2/ DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8
+root://cmseos.fnal.gov/store/user/yokugawa/ZC_2016_no2/ TT_TuneCUETP8M1_13TeV-powheg-pythia8 
+root://cmseos.fnal.gov/store/user/yokugawa/ZC_2016_no2/ WZ_TuneCUETP8M1_13TeV-pythia8 
+root://cmseos.fnal.gov/store/user/yokugawa/ZC_2016_no2/ WW_TuneCUETP8M1_13TeV-pythia8 
+root://cmseos.fnal.gov/store/user/yokugawa/ZC_2016_no2/ ZZ_TuneCUETP8M1_13TeV-pythia8 

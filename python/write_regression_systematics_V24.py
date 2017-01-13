@@ -24,8 +24,6 @@ from myutils import BetterConfigParser, ParseInfo, TreeCache, LeptonSF, util_fun
 #INPUT
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-debug = False 
-
 argv = sys.argv
 parser = OptionParser()
 parser.add_option("-S", "--samples", dest="names", default="", 
@@ -53,6 +51,7 @@ if opts.config =="":
 print opts.config
 config = BetterConfigParser()
 config.read(opts.config)
+debug = eval(config.get('General','Debug'))
 anaTag = config.get("Analysis","tag")
 TrainFlag = eval(config.get('Analysis','TrainFlag'))
 btagLibrary = config.get('BTagReshaping','library')
@@ -60,8 +59,8 @@ samplesinfo=config.get('Directories','samplesinfo')
 channel=config.get('Configuration','channel')
 print 'channel is', channel
 
-VHbbNameSpace=config.get('VHbbNameSpace','library')
-ROOT.gSystem.Load(VHbbNameSpace)
+#VHbbNameSpace=config.get('VHbbNameSpace','library')
+#ROOT.gSystem.Load(VHbbNameSpace)
 AngLikeBkgs=eval(config.get('AngularLike','backgrounds'))
 ang_yield=eval(config.get('AngularLike','yields'))
 
@@ -78,6 +77,11 @@ print 'OUTput samples:\t%s'%pathOUT
 
 
 run_locally = config.get('Configuration', 'run_locally')
+
+if debug:
+  run_locally = 'True'
+
+
 namelist=opts.names.split(',')
 if run_locally == 'False':
   namelist = []
@@ -293,7 +297,7 @@ def computeTrigWeight(weight_trig,weight):
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
-def fillTree(inputfile,outputfile):
+def fillTree(inputfile,outputfile,skimCut):
 
     input = ROOT.TFile.Open(inputfile,'read')
     output = ROOT.TFile.Open(outputfile,'recreate')
@@ -340,6 +344,9 @@ def fillTree(inputfile,outputfile):
     DY_specialWeight[0] = 1
     newtree.Branch('DY_specialWeight',DY_specialWeight,'DY_specialWeight/F')
 
+    Jet_vtxMassCorr1 = array('f',100*[-1])
+    newtree.Branch('Jet_vtxMassCorr1',Jet_vtxMassCorr1,'Jet_vtxMassCorr1[tree.nJet]/F') #=1 for Vtype == 0, muon channel, applied for electron ID and trigger (HLT?)
+
     emu_id_iso_weight = array('f',[0])
     emu_id_iso_weight[0] = 1
     newtree.Branch('emu_id_iso_weight',emu_id_iso_weight,'emu_id_iso_weight/F') #=1 for Vtype == 0, muon channel, applied for electron ID and trigger (HLT?)
@@ -355,10 +362,18 @@ def fillTree(inputfile,outputfile):
     emu_lep_pt = array('f',2*[-1])
     emu_lep_pt[0], emu_lep_pt[1] = -1, -1
     newtree.Branch('emu_lep_pt',emu_lep_pt,'emu_lep_pt[2]/F') #=0 for muon, 1 for electron
+    
+    emu_lep_phi = array('f',2*[-10])
+    emu_lep_phi[0], emu_lep_phi[1] = -10, -10
+    newtree.Branch('emu_lep_phi',emu_lep_phi,'emu_lep_phi[2]/F') #=0 for muon, 1 for electron
 
     emu_lep_eta = array('f',2*[-10])
     emu_lep_eta[0], emu_lep_eta[1] = -10, -10
     newtree.Branch('emu_lep_eta',emu_lep_eta,'emu_lep_eta[2]/F') #=0 for muon, 1 for electron
+    
+    emu_lep_mass = array('f',2*[-1])
+    emu_lep_mass[0], emu_lep_mass[1] = -1, -1
+    newtree.Branch('emu_lep_mass',emu_lep_mass,'emu_lep_mass[2]/F') #=0 for muon, 1 for electron
     
     emu_lep_iso = array('f',2*[-1])
     emu_lep_iso[0], emu_lep_iso[1] = -1, -1
@@ -393,7 +408,69 @@ def fillTree(inputfile,outputfile):
     emuweight_trig = array('f', 3*[1])
     emuweight_trig[0], emuweight_trig[1], emuweight_trig[2] = 1., 1., 1.
     newtree.Branch('emuweight_trig',emuweight_trig,'emuweight_trig[3]/F')
+    
+    is_ttsemi = array('i',[0])
+    is_ttsemi[0] = 0
+    newtree.Branch('is_ttsemi', is_ttsemi, 'is_ttsemi/I')
+   
+    ttsemi_lep_pt = array('f',[-1])
+    ttsemi_lep_pt[0] = -1
+    newtree.Branch('ttsemi_lep_pt',ttsemi_lep_pt,'ttsemi_lep_pt/F') #=0 for muon, 1 for electron
+    
+    ttsemi_lep_phi = array('f',[-10])
+    ttsemi_lep_phi[0] = -10
+    newtree.Branch('ttsemi_lep_phi',ttsemi_lep_phi,'ttsemi_lep_phi/F') #=0 for muon, 1 for electron
 
+    ttsemi_lep_eta = array('f',[-10])
+    ttsemi_lep_eta[0] = -10
+    newtree.Branch('ttsemi_lep_eta',ttsemi_lep_eta,'ttsemi_lep_eta/F') #=0 for muon, 1 for electron
+    
+    ttsemi_lep_mass = array('f',[-1])
+    ttsemi_lep_mass[0] = -1
+    newtree.Branch('ttsemi_lep_mass',ttsemi_lep_mass,'ttsemi_lep_mass/F') #=0 for muon, 1 for electron
+    
+    ttsemi_lep_iso = array('f',[-1])
+    ttsemi_lep_iso[0] = -1
+    newtree.Branch('ttsemi_lep_iso',ttsemi_lep_iso,'ttsemi_lep_iso/F') #=0 for muon, 1 for electron
+    
+    ttsemi_lep_pdgId = array('i',[-1])
+    ttsemi_lep_pdgId[0] = -1
+    newtree.Branch('ttsemi_lep_pdgId',ttsemi_lep_pdgId,'ttsemi_lep_pdgId/I') #=0 for muon, 1 for electron
+
+    ttsemi_lep_looseId = array('i',[-1])
+    ttsemi_lep_looseId[0] = -1
+    newtree.Branch('ttsemi_lep_looseId',ttsemi_lep_looseId,'ttsemi_lep_looseId/I') #=0 for muon, 1 for electron
+    ttsemi_lep_mediumId = array('i',[-1])
+    ttsemi_lep_mediumId[0] = -1
+    newtree.Branch('ttsemi_lep_mediumId',ttsemi_lep_mediumId,'ttsemi_lep_mediumId/I') #=0 for muon, 1 for electron
+    ttsemi_lep_tightId = array('i',[-1])
+    ttsemi_lep_tightId[0] = -1
+    newtree.Branch('ttsemi_lep_tightId',ttsemi_lep_tightId,'ttsemi_lep_tightId/I') #=0 for muon, 1 for electron
+    
+    ttsemi_lep_veto = array('i', 6*[-1])
+    ttsemi_lep_veto[0],ttsemi_lep_veto[1],ttsemi_lep_veto[2] = -1, -1, -1
+    ttsemi_lep_veto[3],ttsemi_lep_veto[4],ttsemi_lep_veto[5] = -1, -1, -1
+    newtree.Branch('ttsemi_lep_veto',ttsemi_lep_veto,'ttsemi_lep_veto[6]/I') #=0 loose veto, 1 medium veto, 3=tight veto
+
+    ttsemi_massChi2 = array('f',[0])
+    ttsemi_topMass = array('f',[0])
+    ttsemi_wMass = array('f',[0])
+    ttsemi_idxJet = array('i',4*[-1])
+    ttsemi_idxJet_sortWjetCSV = array('i',4*[-1])
+
+    newtree.Branch('ttsemi_massChi2', ttsemi_massChi2, 'ttsemi_massChi2/F')
+    newtree.Branch('ttsemi_topMass', ttsemi_topMass, 'ttsemi_topMass/F')
+    newtree.Branch('ttsemi_wMass', ttsemi_wMass, 'ttsemi_wMass/F')
+    newtree.Branch('ttsemi_idxJet', ttsemi_idxJet, 'ttsemi_idxJet[4]/I')
+    newtree.Branch('ttsemi_idxJet_sortWjetCSV', ttsemi_idxJet_sortWjetCSV, 'ttsemi_idxJet_sortWjetCSV[4]/I')
+   
+    ttsemiweight = array('f', 3*[1])
+    ttsemiweight[0], ttsemiweight[1], ttsemiweight[2] = 1., 1., 1.
+    newtree.Branch('ttsemiweight',ttsemiweight,'ttsemiweight[3]/F')
+
+    ttsemiweight_trig = array('f', 3*[1])
+    ttsemiweight_trig[0], ttsemiweight_trig[1], ttsemiweight_trig[2] = 1., 1., 1.
+    newtree.Branch('ttsemiweight_trig',ttsemiweight_trig,'ttsemiweight_trig[3]/F')
 
     idxJet_passCSV = array('i',2*[-1])
     idxJet_passCSV[0] = -1  
@@ -448,21 +525,53 @@ def fillTree(inputfile,outputfile):
       if job.type != 'DATA':
           EventForTraining[0]=int(not TFlag.EvalInstance())
      
+      #fill correctMass
+      for i in range(0, tree.nJet):
+        if tree.nprimaryVertices > 0:
+          Jet_vtxMassCorr1[i] = util_funcs.VtxMassCorr(tree.primaryVertices_x[0], tree.primaryVertices_y[0], tree.primaryVertices_z[0], tree.Jet_vtxPosX[i], tree.Jet_vtxPosY[i], tree.Jet_vtxPosZ[i], tree.Jet_vtxPx[i], tree.Jet_vtxPy[i], tree.Jet_vtxPz[i], tree.Jet_vtxMass[i]) 
+        else:
+          Jet_vtxMassCorr1[i] = -1
+
       #find emu event
       #initial emu event
       is_emu[0] = 0
       emu_lep_pt[0], emu_lep_pt[1] = -1, -1
       emu_lep_eta[0], emu_lep_eta[1] = -10, -10
+      emu_lep_phi[0], emu_lep_phi[1] = -10, -10
+      emu_lep_mass[0], emu_lep_mass[1] = -1, -1
       emu_lep_pdgId[0], emu_lep_pdgId[1] = -1, -1
       emu_lep_looseId[0], emu_lep_looseId[1] = -1, -1
       emu_lep_mediumId[0], emu_lep_mediumId[1] = -1, -1
       emu_lep_tightId[0], emu_lep_tightId[1] = -1, -1
       emu_lep_iso[0], emu_lep_iso[1] = -1, -1
+
+      #find tt semi lepton event
+      #inital tt semi lepton event 
+      is_ttsemi[0] = 0
+      ttsemi_lep_pt[0] = -1
+      ttsemi_lep_eta[0] = -10
+      ttsemi_lep_phi[0] = -10
+      ttsemi_lep_mass[0] = -1
+      ttsemi_lep_pdgId[0] = -1
+      ttsemi_lep_looseId[0] = -1
+      ttsemi_lep_mediumId[0] = -1
+      ttsemi_lep_tightId[0] = -1
+      ttsemi_lep_iso[0] = -1
+      ttsemi_lep_veto[0],ttsemi_lep_veto[1],ttsemi_lep_veto[2] = -1, -1, -1
+      ttsemi_lep_veto[3],ttsemi_lep_veto[4],ttsemi_lep_veto[5] = -1, -1, -1
+      ttsemi_massChi2[0] = -1
+      ttsemi_topMass[0] = -1
+      ttsemi_wMass[0] = -1
+      for i in range(0,4):
+        ttsemi_idxJet[i] = -1
+        ttsemi_idxJet_sortWjetCSV[i] = -1
       
       if tree.Vtype != 0 and tree.Vtype != 1:
         lepTmp_idx = []
         lepTmp_pt = []
         lepTmp_eta = []
+        lepTmp_phi = []
+        lepTmp_mass = []
         lepTmp_pdgId = []
         lepTmp_looseId = []
         lepTmp_mediumId = []
@@ -474,6 +583,8 @@ def fillTree(inputfile,outputfile):
           lepTmp_idx.append(iLepTmp)
           lepTmp_pt.append(tree.vLeptons_pt[i])
           lepTmp_eta.append(tree.vLeptons_eta[i])
+          lepTmp_phi.append(tree.vLeptons_phi[i])
+          lepTmp_mass.append(tree.vLeptons_mass[i])
           lepTmp_pdgId.append(tree.vLeptons_pdgId[i])
           lepTmp_looseId.append(tree.vLeptons_looseIdPOG[i])
           lepTmp_mediumId.append(tree.vLeptons_mediumIdPOG_ICHEP2016[i])
@@ -484,6 +595,8 @@ def fillTree(inputfile,outputfile):
           lepTmp_idx.append(iLepTmp)
           lepTmp_pt.append(tree.aLeptons_pt[i])
           lepTmp_eta.append(tree.aLeptons_eta[i])
+          lepTmp_phi.append(tree.aLeptons_phi[i])
+          lepTmp_mass.append(tree.aLeptons_mass[i])
           lepTmp_pdgId.append(tree.aLeptons_pdgId[i])
           lepTmp_looseId.append(tree.aLeptons_looseIdPOG[i])
           lepTmp_mediumId.append(tree.aLeptons_mediumIdPOG_ICHEP2016[i])
@@ -509,12 +622,88 @@ def fillTree(inputfile,outputfile):
           if is_emu[0] == 1:
              emu_lep_pt[0], emu_lep_pt[1] = lepTmp_pt[muIdx], lepTmp_pt[eIdx]
              emu_lep_eta[0], emu_lep_eta[1] = lepTmp_eta[muIdx], lepTmp_eta[eIdx]
+             emu_lep_phi[0], emu_lep_phi[1] = lepTmp_phi[muIdx], lepTmp_phi[eIdx]
+             emu_lep_mass[0], emu_lep_mass[1] = lepTmp_mass[muIdx], lepTmp_mass[eIdx]
              emu_lep_iso[0], emu_lep_iso[1] = lepTmp_iso[muIdx], lepTmp_iso[eIdx]
              emu_lep_pdgId[0], emu_lep_pdgId[1] = lepTmp_pdgId[muIdx], lepTmp_pdgId[eIdx]
              emu_lep_looseId[0], emu_lep_looseId[1] = lepTmp_looseId[muIdx], lepTmp_looseId[eIdx]
              emu_lep_mediumId[0], emu_lep_mediumId[1] = lepTmp_mediumId[muIdx], lepTmp_mediumId[eIdx]
              emu_lep_tightId[0], emu_lep_tightId[1] = lepTmp_tightId[muIdx], lepTmp_tightId[eIdx]
-              
+        
+        if len(lepTmp_idx) >= 1:
+          #check is there are second isolated leptons 
+          for i in range(1, len(lepTmp_idx)):
+            iLep = lepTmp_idx[i]
+            if lepTmp_pt[iLep] > 25 and abs(lepTmp_eta[iLep]) < 2.4 and lepTmp_iso[iLep] < 0.15:
+              if lepTmp_looseId[iLep] == 1:
+                ttsemi_lep_veto[0] = 1
+              if lepTmp_mediumId[iLep] == 1:
+                ttsemi_lep_veto[1] = 1
+              if lepTmp_tightId[iLep] >= 1:
+                ttsemi_lep_veto[2] = 1
+            if lepTmp_pt[iLep] > 25 and abs(lepTmp_eta[iLep]) < 2.4 and lepTmp_iso[iLep] < 0.25:
+              if lepTmp_looseId[iLep] == 1:
+                ttsemi_lep_veto[3] = 1
+              if lepTmp_mediumId[iLep] == 1:
+                ttsemi_lep_veto[4] = 1
+              if lepTmp_tightId[iLep] >= 1:
+                ttsemi_lep_veto[5] = 1
+
+
+
+          is_ttsemi[0] = 1
+          #fill leading lepton
+          idxTmp = lepTmp_idx[0]
+          ttsemi_lep_pt[0]= lepTmp_pt[idxTmp]
+          ttsemi_lep_eta[0]= lepTmp_eta[idxTmp]
+          ttsemi_lep_phi[0]= lepTmp_phi[idxTmp]
+          ttsemi_lep_mass[0]= lepTmp_mass[idxTmp]
+          ttsemi_lep_pdgId[0]= lepTmp_pdgId[idxTmp]
+          ttsemi_lep_looseId[0]= lepTmp_looseId[idxTmp]
+          ttsemi_lep_mediumId[0]= lepTmp_mediumId[idxTmp]
+          ttsemi_lep_tightId[0]= lepTmp_tightId[idxTmp]
+          ttsemi_lep_iso[0]= lepTmp_iso[idxTmp]
+            
+          #loop over four leading jets and calculate the chi2
+          if tree.nJet >= 4:
+            for i in range(0,4): #b_t_1
+              p_i = ROOT.TLorentzVector()
+              p_i.SetPtEtaPhiM(tree.Jet_pt[i], tree.Jet_eta[i], tree.Jet_phi[i], tree.Jet_mass[i])
+              for j in range(0,4): #b_t_2 comes together with W
+                if j != i:
+                  p_j = ROOT.TLorentzVector()
+                  p_j.SetPtEtaPhiM(tree.Jet_pt[j], tree.Jet_eta[j], tree.Jet_phi[j], tree.Jet_mass[j])
+                  tmp = [0,1,2,3]
+                  tmp.remove(i)
+                  tmp.remove(j)
+                  k = min(tmp) #leading W jet
+                  l = max(tmp) #subleading Wjet
+                  p_k = ROOT.TLorentzVector()
+                  p_k.SetPtEtaPhiM(tree.Jet_pt[k], tree.Jet_eta[k], tree.Jet_phi[k], tree.Jet_mass[k])
+                  p_l = ROOT.TLorentzVector()
+                  p_l.SetPtEtaPhiM(tree.Jet_pt[l], tree.Jet_eta[l], tree.Jet_phi[l], tree.Jet_mass[l])
+                  w_mass = (p_k + p_l).M()
+                  t_mass = (p_j + p_k + p_l).M()
+                  chi2 = pow((t_mass - 173.2),2) + pow((w_mass - 80.4),2)
+                  if ttsemi_massChi2[0] < 0 or chi2 < ttsemi_massChi2[0] :
+                      ttsemi_massChi2[0] = chi2
+                      ttsemi_topMass[0] = t_mass
+                      ttsemi_wMass[0] = w_mass
+                      ttsemi_idxJet[0] = i
+                      ttsemi_idxJet[1] = j
+                      ttsemi_idxJet[2] = k
+                      ttsemi_idxJet[3] = l
+
+                      ttsemi_idxJet_sortWjetCSV[0] = i
+                      ttsemi_idxJet_sortWjetCSV[1] = j
+                      if tree.Jet_btagCSV[k] > tree.Jet_btagCSV[l]:
+                        ttsemi_idxJet_sortWjetCSV[2] = k
+                        ttsemi_idxJet_sortWjetCSV[3] = l
+                      else:
+                        ttsemi_idxJet_sortWjetCSV[2] = l
+                        ttsemi_idxJet_sortWjetCSV[3] = k
+
+
       #find emu event
       #idx_emu[0] = -1
       #idx_emu[1] = -1
@@ -600,6 +789,9 @@ def fillTree(inputfile,outputfile):
       #id and iso weight for emu sample
       emuweight[0], emuweight[1], emuweight[2] = 1., 1., 1.
       emuweight_trig[0], emuweight_trig[1], emuweight_trig[2] = 1., 1., 1.
+      
+      ttsemiweight[0], ttsemiweight[1], ttsemiweight[2] = 1., 1., 1.
+      ttsemiweight_trig[0], ttsemiweight_trig[1], ttsemiweight_trig[2] = 1., 1., 1.
 
       if job.type != 'DATA':
  
@@ -646,6 +838,24 @@ def fillTree(inputfile,outputfile):
           #trigger weight
           sfTmp = (muTrig_Eff_reader_2.get_2D(emu_lep_pt[0], emu_lep_eta[0]))[0]
           if sfTmp > 0: emuweight_trig[0] = sfTmp
+        
+        if is_ttsemi[0] == 1:
+          if abs(ttsemi_lep_pdgId[0]) == 13:
+            sfTmp = (muIso_SF_reader.get_2D(ttsemi_lep_pt[0], ttsemi_lep_eta[0]))[0]
+            if sfTmp > 0: ttsemiweight[0] = ttsemiweight[0]*sfTmp
+            sfTmp = (muID_SF_reader.get_2D(ttsemi_lep_pt[0], ttsemi_lep_eta[0]))[0]
+            if sfTmp > 0: ttsemiweight[0] = ttsemiweight[0]*sfTmp
+            #trigger weight
+            sfTmp = (muTrig_Eff_reader_2.get_2D(ttsemi_lep_pt[0], ttsemi_lep_eta[0]))[0]
+            if sfTmp > 0: ttsemiweight_trig[0] = sfTmp
+          
+          #now doing for electron, only ID SF available
+          if abs(ttsemi_lep_pdgId[0]) == 11:
+            iBin = eleID_SF_his.FindFixBin(ttsemi_lep_eta[0], ttsemi_lep_pt[0])
+            sfTmp = eleID_SF_his.GetBinContent(iBin)
+            if sfTmp > 0: ttsemiweight[0] = ttsemiweight[0]*sfTmp
+
+
 
         '''
         emu_id_iso_weight[0] = 1
@@ -735,9 +945,22 @@ def fillTree(inputfile,outputfile):
       newtree.Fill()
       nFilled += 1      
 
-    print 'Exit loop. Total filled event: ', nFilled
-    newtree.FlushBaskets()
-    newtree.AutoSave()
+
+#@@@@@@@@@@@@@Apply the skims, selection cuts@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    output.cd()
+    print "============================================================="
+    print "Apply skim cuts to new tree: ", skimCut 
+
+    newtree1 = newtree.CopyTree(skimCut) 
+
+    print 'Total filled event: ', nFilled
+    print 'Total events after skim: ', newtree1.GetEntries()
+
+    #newtree.FlushBaskets()
+    #newtree.AutoSave()
+    newtree1.FlushBaskets()
+    newtree1.AutoSave()
+
     print 'Save'
     output.Close()
     print 'Close'
@@ -777,11 +1000,27 @@ for job in info:
     tmpFileList = ''
     if run_locally == 'True':
       inFile_folder = pathIN + '/' + job.prefix+job.identifier
+      if pathIN.find('.txt') != -1 or pathIN.find('.tex') != -1: #use a file as list of folder, in this case samples located in different folder
+        inFile_folder = util_funcs.getInputFolder(pathIN, job.identifier)
+        #lines = open(pathIN).readlines()
+        #for l in lines:
+        #  if '#' in l: continue
+        #  if job.identifier in l:
+        #    inFile_folder = l.split()[0] + '/' + job.identifier
+        #    if 'root://cmseos.fnal.gov' in inFile_folder:
+        #      inFile_folder = inFile_folder.split('root://cmseos.fnal.gov')[1]
+        #    break
+      print '>>>>>>>>>>>>>>>>>>FOLDER of root file: ', inFile_folder
+ 
       tmpD =  config.get('Directories','samplefiles').replace('/','') + '_afterPrepStep/'
       os.system('mkdir ' + tmpD)
       tmpFileList =  tmpD + job.prefix + job.identifier + '.txt'
       os.system('rm -f ' + tmpFileList)
-      util_funcs.findSubFolders(inFile_folder,tmpFileList,False)
+      if '/store' in inFile_folder:
+        util_funcs.findSubFolders(inFile_folder,tmpFileList,True)
+      else:
+        util_funcs.findSubFolders(inFile_folder,tmpFileList,False)
+
     else:
       tmpFileList = opts.names
 
@@ -802,6 +1041,9 @@ for job in info:
     nFile_for_processing = int(config.get('Configuration','nFile_for_processing'))
     if run_locally == 'False':
       nFile_for_processing = -1
+    if debug:
+      nFile_for_processing = 1
+
     print '>>>>> nFile_for_processing: ', nFile_for_processing
     nFile = 0
     for line in open(tmpFileList).readlines():
@@ -809,7 +1051,7 @@ for job in info:
       line_tmp = line.split('/')
       outTmp = line_tmp[len(line_tmp)-1].replace('.root', '_moreInfo.root')
       if run_locally == 'True': outTmp = outputFolder + '/' + outTmp
-      input_processings.append((line,outTmp))
+      input_processings.append((line,outTmp,job.addtreecut))
       fileList.append(line)
       nFile += 1
       if nFile_for_processing > 0 and nFile >= nFile_for_processing: break

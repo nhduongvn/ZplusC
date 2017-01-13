@@ -557,8 +557,8 @@ def fillTree(inputfile,outputfile,skimCut):
       ttsemi_lep_mediumId[0] = -1
       ttsemi_lep_tightId[0] = -1
       ttsemi_lep_iso[0] = -1
-      ttsemi_lep_veto[0],ttsemi_lep_veto[1],ttsemi_lep_veto[2] = -1, -1, -1
-      ttsemi_lep_veto[3],ttsemi_lep_veto[4],ttsemi_lep_veto[5] = -1, -1, -1
+      ttsemi_lep_veto[0],ttsemi_lep_veto[1],ttsemi_lep_veto[2] = 1, 1, 1
+      ttsemi_lep_veto[3],ttsemi_lep_veto[4],ttsemi_lep_veto[5] = 1, 1, 1
       ttsemi_massChi2[0] = -1
       ttsemi_topMass[0] = -1
       ttsemi_wMass[0] = -1
@@ -566,19 +566,19 @@ def fillTree(inputfile,outputfile,skimCut):
         ttsemi_idxJet[i] = -1
         ttsemi_idxJet_sortWjetCSV[i] = -1
       
-      if tree.Vtype != 0 and tree.Vtype != 1:
-        lepTmp_idx = []
-        lepTmp_pt = []
-        lepTmp_eta = []
-        lepTmp_phi = []
-        lepTmp_mass = []
-        lepTmp_pdgId = []
-        lepTmp_looseId = []
-        lepTmp_mediumId = []
-        lepTmp_tightId = []
-        lepTmp_iso = []
-        iLepTmp = -1
-        for i in range(tree.nvLeptons):
+      lepTmp_idx = []
+      lepTmp_pt = []
+      lepTmp_eta = []
+      lepTmp_phi = []
+      lepTmp_mass = []
+      lepTmp_pdgId = []
+      lepTmp_looseId = []
+      lepTmp_mediumId = []
+      lepTmp_tightId = []
+      lepTmp_iso = []
+      iLepTmp = -1
+      for i in range(tree.nvLeptons):
+        if tree.vLeptons_pt[i] > 25 and abs(tree.vLeptons_eta[i]) < 2.4 and tree.vLeptons_mediumIdPOG_ICHEP2016[i] >= 1 and tree.vLeptons_pfRelIso04[i] < 0.25:
           iLepTmp = iLepTmp + 1
           lepTmp_idx.append(iLepTmp)
           lepTmp_pt.append(tree.vLeptons_pt[i])
@@ -590,7 +590,8 @@ def fillTree(inputfile,outputfile,skimCut):
           lepTmp_mediumId.append(tree.vLeptons_mediumIdPOG_ICHEP2016[i])
           lepTmp_tightId.append(tree.vLeptons_tightId[i])
           lepTmp_iso.append(tree.vLeptons_pfRelIso04[i])
-        for i in range(tree.naLeptons):
+      for i in range(tree.naLeptons):
+        if tree.aLeptons_pt[i] > 25 and abs(tree.aLeptons_eta[i]) < 2.4 and tree.aLeptons_mediumIdPOG_ICHEP2016[i] >= 1 and tree.aLeptons_pfRelIso04[i] < 0.25:
           iLepTmp = iLepTmp + 1
           lepTmp_idx.append(iLepTmp)
           lepTmp_pt.append(tree.aLeptons_pt[i])
@@ -602,106 +603,88 @@ def fillTree(inputfile,outputfile,skimCut):
           lepTmp_mediumId.append(tree.aLeptons_mediumIdPOG_ICHEP2016[i])
           lepTmp_tightId.append(tree.aLeptons_tightId[i])
           lepTmp_iso.append(tree.aLeptons_pfRelIso04[i])
-        
-        util_funcs.sortPt(lepTmp_idx, lepTmp_pt)
+      
+      util_funcs.sortPt(lepTmp_idx, lepTmp_pt)
 
-        if len(lepTmp_idx) >= 2:
-          iLepTmp1 = lepTmp_idx[0]
-          iLepTmp2 = lepTmp_idx[1]
-          muIdx = -1
-          eIdx = -1
-          if (abs(lepTmp_pdgId[iLepTmp1]) == 11 and abs(lepTmp_pdgId[iLepTmp2]) == 13):
-              is_emu[0] = 1
-              muIdx = iLepTmp2
-              eIdx = iLepTmp1
-          if (abs(lepTmp_pdgId[iLepTmp1]) == 13 and abs(lepTmp_pdgId[iLepTmp2]) == 11):
-              is_emu[0] = 1
-              muIdx = iLepTmp1
-              eIdx = iLepTmp2
-           
-          if is_emu[0] == 1:
-             emu_lep_pt[0], emu_lep_pt[1] = lepTmp_pt[muIdx], lepTmp_pt[eIdx]
-             emu_lep_eta[0], emu_lep_eta[1] = lepTmp_eta[muIdx], lepTmp_eta[eIdx]
-             emu_lep_phi[0], emu_lep_phi[1] = lepTmp_phi[muIdx], lepTmp_phi[eIdx]
-             emu_lep_mass[0], emu_lep_mass[1] = lepTmp_mass[muIdx], lepTmp_mass[eIdx]
-             emu_lep_iso[0], emu_lep_iso[1] = lepTmp_iso[muIdx], lepTmp_iso[eIdx]
-             emu_lep_pdgId[0], emu_lep_pdgId[1] = lepTmp_pdgId[muIdx], lepTmp_pdgId[eIdx]
-             emu_lep_looseId[0], emu_lep_looseId[1] = lepTmp_looseId[muIdx], lepTmp_looseId[eIdx]
-             emu_lep_mediumId[0], emu_lep_mediumId[1] = lepTmp_mediumId[muIdx], lepTmp_mediumId[eIdx]
-             emu_lep_tightId[0], emu_lep_tightId[1] = lepTmp_tightId[muIdx], lepTmp_tightId[eIdx]
-        
-        if len(lepTmp_idx) >= 1:
-          #check is there are second isolated leptons 
-          for i in range(1, len(lepTmp_idx)):
-            iLep = lepTmp_idx[i]
-            if lepTmp_pt[iLep] > 25 and abs(lepTmp_eta[iLep]) < 2.4 and lepTmp_iso[iLep] < 0.15:
-              if lepTmp_looseId[iLep] == 1:
-                ttsemi_lep_veto[0] = 1
-              if lepTmp_mediumId[iLep] == 1:
-                ttsemi_lep_veto[1] = 1
-              if lepTmp_tightId[iLep] >= 1:
-                ttsemi_lep_veto[2] = 1
-            if lepTmp_pt[iLep] > 25 and abs(lepTmp_eta[iLep]) < 2.4 and lepTmp_iso[iLep] < 0.25:
-              if lepTmp_looseId[iLep] == 1:
-                ttsemi_lep_veto[3] = 1
-              if lepTmp_mediumId[iLep] == 1:
-                ttsemi_lep_veto[4] = 1
-              if lepTmp_tightId[iLep] >= 1:
-                ttsemi_lep_veto[5] = 1
+      if len(lepTmp_idx) == 2:
+        iLepTmp1 = lepTmp_idx[0]
+        iLepTmp2 = lepTmp_idx[1]
+        muIdx = -1
+        eIdx = -1
+        if (abs(lepTmp_pdgId[iLepTmp1]) == 11 and abs(lepTmp_pdgId[iLepTmp2]) == 13):
+            is_emu[0] = 1
+            muIdx = iLepTmp2
+            eIdx = iLepTmp1
+        if (abs(lepTmp_pdgId[iLepTmp1]) == 13 and abs(lepTmp_pdgId[iLepTmp2]) == 11):
+            is_emu[0] = 1
+            muIdx = iLepTmp1
+            eIdx = iLepTmp2
+         
+        if is_emu[0] == 1:
+           emu_lep_pt[0], emu_lep_pt[1] = lepTmp_pt[muIdx], lepTmp_pt[eIdx]
+           emu_lep_eta[0], emu_lep_eta[1] = lepTmp_eta[muIdx], lepTmp_eta[eIdx]
+           emu_lep_phi[0], emu_lep_phi[1] = lepTmp_phi[muIdx], lepTmp_phi[eIdx]
+           emu_lep_mass[0], emu_lep_mass[1] = lepTmp_mass[muIdx], lepTmp_mass[eIdx]
+           emu_lep_iso[0], emu_lep_iso[1] = lepTmp_iso[muIdx], lepTmp_iso[eIdx]
+           emu_lep_pdgId[0], emu_lep_pdgId[1] = lepTmp_pdgId[muIdx], lepTmp_pdgId[eIdx]
+           emu_lep_looseId[0], emu_lep_looseId[1] = lepTmp_looseId[muIdx], lepTmp_looseId[eIdx]
+           emu_lep_mediumId[0], emu_lep_mediumId[1] = lepTmp_mediumId[muIdx], lepTmp_mediumId[eIdx]
+           emu_lep_tightId[0], emu_lep_tightId[1] = lepTmp_tightId[muIdx], lepTmp_tightId[eIdx]
+      
+      if len(lepTmp_idx) == 1:
+        is_ttsemi[0] = 1
+        #fill leading lepton
+        idxTmp = lepTmp_idx[0]
+        ttsemi_lep_pt[0]= lepTmp_pt[idxTmp]
+        ttsemi_lep_eta[0]= lepTmp_eta[idxTmp]
+        ttsemi_lep_phi[0]= lepTmp_phi[idxTmp]
+        ttsemi_lep_mass[0]= lepTmp_mass[idxTmp]
+        ttsemi_lep_pdgId[0]= lepTmp_pdgId[idxTmp]
+        ttsemi_lep_looseId[0]= lepTmp_looseId[idxTmp]
+        ttsemi_lep_mediumId[0]= lepTmp_mediumId[idxTmp]
+        ttsemi_lep_tightId[0]= lepTmp_tightId[idxTmp]
+        ttsemi_lep_iso[0]= lepTmp_iso[idxTmp]
+          
+        #loop over five leading jets and calculate the chi2
+        if tree.nJet >= 4:
+          maxJetInd = min(tree.nJet,4)
+          for i in range(0,maxJetInd): #b_t_1
+            p_i = ROOT.TLorentzVector()
+            p_i.SetPtEtaPhiM(tree.Jet_pt[i], tree.Jet_eta[i], tree.Jet_phi[i], tree.Jet_mass[i])
+            for j in range(0,maxJetInd): #b_t_2 comes together with W
+              if j != i:
+                p_j = ROOT.TLorentzVector()
+                p_j.SetPtEtaPhiM(tree.Jet_pt[j], tree.Jet_eta[j], tree.Jet_phi[j], tree.Jet_mass[j])
+                tmp = [0,1,2,3]
+                if maxJetInd == 5: tmp.append(4)
+                tmp.remove(i)
+                tmp.remove(j)
+                k = min(tmp) #leading W jet
+                l = max(tmp) #subleading Wjet
+                p_k = ROOT.TLorentzVector()
+                p_k.SetPtEtaPhiM(tree.Jet_pt[k], tree.Jet_eta[k], tree.Jet_phi[k], tree.Jet_mass[k])
+                p_l = ROOT.TLorentzVector()
+                p_l.SetPtEtaPhiM(tree.Jet_pt[l], tree.Jet_eta[l], tree.Jet_phi[l], tree.Jet_mass[l])
+                w_mass = (p_k + p_l).M()
+                t_mass = (p_j + p_k + p_l).M()
+                chi2 = pow((t_mass - 173.2),2) + pow((w_mass - 80.4),2)
+                if ttsemi_massChi2[0] < 0 or chi2 < ttsemi_massChi2[0] :
+                    ttsemi_massChi2[0] = chi2
+                    ttsemi_topMass[0] = t_mass
+                    ttsemi_wMass[0] = w_mass
+                    ttsemi_idxJet[0] = i
+                    ttsemi_idxJet[1] = j
+                    ttsemi_idxJet[2] = k
+                    ttsemi_idxJet[3] = l
 
-
-
-          is_ttsemi[0] = 1
-          #fill leading lepton
-          idxTmp = lepTmp_idx[0]
-          ttsemi_lep_pt[0]= lepTmp_pt[idxTmp]
-          ttsemi_lep_eta[0]= lepTmp_eta[idxTmp]
-          ttsemi_lep_phi[0]= lepTmp_phi[idxTmp]
-          ttsemi_lep_mass[0]= lepTmp_mass[idxTmp]
-          ttsemi_lep_pdgId[0]= lepTmp_pdgId[idxTmp]
-          ttsemi_lep_looseId[0]= lepTmp_looseId[idxTmp]
-          ttsemi_lep_mediumId[0]= lepTmp_mediumId[idxTmp]
-          ttsemi_lep_tightId[0]= lepTmp_tightId[idxTmp]
-          ttsemi_lep_iso[0]= lepTmp_iso[idxTmp]
-            
-          #loop over four leading jets and calculate the chi2
-          if tree.nJet >= 4:
-            for i in range(0,4): #b_t_1
-              p_i = ROOT.TLorentzVector()
-              p_i.SetPtEtaPhiM(tree.Jet_pt[i], tree.Jet_eta[i], tree.Jet_phi[i], tree.Jet_mass[i])
-              for j in range(0,4): #b_t_2 comes together with W
-                if j != i:
-                  p_j = ROOT.TLorentzVector()
-                  p_j.SetPtEtaPhiM(tree.Jet_pt[j], tree.Jet_eta[j], tree.Jet_phi[j], tree.Jet_mass[j])
-                  tmp = [0,1,2,3]
-                  tmp.remove(i)
-                  tmp.remove(j)
-                  k = min(tmp) #leading W jet
-                  l = max(tmp) #subleading Wjet
-                  p_k = ROOT.TLorentzVector()
-                  p_k.SetPtEtaPhiM(tree.Jet_pt[k], tree.Jet_eta[k], tree.Jet_phi[k], tree.Jet_mass[k])
-                  p_l = ROOT.TLorentzVector()
-                  p_l.SetPtEtaPhiM(tree.Jet_pt[l], tree.Jet_eta[l], tree.Jet_phi[l], tree.Jet_mass[l])
-                  w_mass = (p_k + p_l).M()
-                  t_mass = (p_j + p_k + p_l).M()
-                  chi2 = pow((t_mass - 173.2),2) + pow((w_mass - 80.4),2)
-                  if ttsemi_massChi2[0] < 0 or chi2 < ttsemi_massChi2[0] :
-                      ttsemi_massChi2[0] = chi2
-                      ttsemi_topMass[0] = t_mass
-                      ttsemi_wMass[0] = w_mass
-                      ttsemi_idxJet[0] = i
-                      ttsemi_idxJet[1] = j
-                      ttsemi_idxJet[2] = k
-                      ttsemi_idxJet[3] = l
-
-                      ttsemi_idxJet_sortWjetCSV[0] = i
-                      ttsemi_idxJet_sortWjetCSV[1] = j
-                      if tree.Jet_btagCSV[k] > tree.Jet_btagCSV[l]:
-                        ttsemi_idxJet_sortWjetCSV[2] = k
-                        ttsemi_idxJet_sortWjetCSV[3] = l
-                      else:
-                        ttsemi_idxJet_sortWjetCSV[2] = l
-                        ttsemi_idxJet_sortWjetCSV[3] = k
+                    ttsemi_idxJet_sortWjetCSV[0] = i
+                    ttsemi_idxJet_sortWjetCSV[1] = j
+                    if tree.Jet_btagCSV[k] > tree.Jet_btagCSV[l]:
+                      ttsemi_idxJet_sortWjetCSV[2] = k
+                      ttsemi_idxJet_sortWjetCSV[3] = l
+                    else:
+                      ttsemi_idxJet_sortWjetCSV[2] = l
+                      ttsemi_idxJet_sortWjetCSV[3] = k
 
 
       #find emu event

@@ -1,0 +1,2 @@
+/uscmst1b_scratch/lpc1/lpctrig/duong/Output_ZplusC_V21/env//TTTo2L2Nu_13TeV-powheg/TTTo2L2Nu_13TeV-powheg_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1_2016-04_1of2.root
+/uscmst1b_scratch/lpc1/lpctrig/duong/Output_ZplusC_V21/env//TTTo2L2Nu_13TeV-powheg/TTTo2L2Nu_13TeV-powheg_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1_2016-04_2of2.root

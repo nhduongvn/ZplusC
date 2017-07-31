@@ -1,0 +1,1 @@
+root://131.225.207.127:1094///store/user/leptonjets/noreplica/godshalk/ZJNtuples_RunII//ZZ_TuneCUETP8M1_13TeV-pythia8_RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1.root

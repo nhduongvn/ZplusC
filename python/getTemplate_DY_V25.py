@@ -29,7 +29,8 @@ def replace_for_list(l, st, st1):
 
 dataPeriod = 'allData' #allData, B, C, D, E, F, G, H
 
-csvCut = 'CSVM'
+#csvCut = 'CSVM'
+csvCut = 'CtagT'
 
 vtxMassType = 'vtxMass' # vtxMass, incVtxMass, vtxMassCorr_IVF
 
@@ -73,6 +74,7 @@ if vtxMassType == 'vtxMassCorr_IVF':
 if csvCut == 'CSVM':
   jetIdx = jetIdx.replace('[0]','[1]')
 
+#if csvCut == 'CtagT'
 
 jsonCut = '(json == 1)'
 triggerCut = {'Zmm': '((HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v == 1) || (HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v == 1) || (HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v == 1) || (HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v == 1))', 'Zee': '((HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v == 1) || (HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v == 1))'} 

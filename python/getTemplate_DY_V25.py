@@ -29,17 +29,18 @@ def replace_for_list(l, st, st1):
 
 dataPeriod = 'allData' #allData, B, C, D, E, F, G, H
 
-#csvCut = 'CSVM'
-csvCut = 'CtagT'
+csvCut = 'CSVM'
+#csvCut = 'CtagT'
 
 vtxMassType = 'vtxMass' # vtxMass, incVtxMass, vtxMassCorr_IVF
 
 channels = ['Zmm', 'Zee']
 
 systs = ['Central','JECUp','JECDown','JERUp','JERDown','gccUp', 'gccDown', 'gbbUp', 'gbbDown', 'puUp', 'puDown'] #always set central first
+#systs = ['Central']
 
-#fOut = ROOT.TFile.Open('Test/template_' + vtxMassType + '_' + csvCut + '_pt20_DY_allData_allWeight_V25.root','recreate')
-fOut = ROOT.TFile.Open('Test/template_' + vtxMassType + '_' + csvCut + '_pt20_DY_' + dataPeriod + '_allWeight_V25.root','recreate')
+fOut = ROOT.TFile.Open('Test/template_' + vtxMassType + '_' + csvCut + '_pt20_noGapEle_DY_allData_allWeight_V25.root','recreate')
+#fOut = ROOT.TFile.Open('Test/template_' + vtxMassType + '_' + csvCut + '_pt20_DY_' + dataPeriod + '_allWeight_V25.root','recreate')
 
 ###########################################
 #Data
@@ -74,7 +75,8 @@ if vtxMassType == 'vtxMassCorr_IVF':
 if csvCut == 'CSVM':
   jetIdx = jetIdx.replace('[0]','[1]')
 
-#if csvCut == 'CtagT'
+if csvCut == 'CtagT':
+  jetIdx = 'idxJet_passCtag_SVT[0]'
 
 jsonCut = '(json == 1)'
 triggerCut = {'Zmm': '((HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v == 1) || (HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v == 1) || (HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v == 1) || (HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v == 1))', 'Zee': '((HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v == 1) || (HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v == 1))'} 
@@ -82,7 +84,8 @@ jetSVTcut = '(Jet_' + vtxMassType + '[' + jetIdx + '] > 0)'
 if vtxMassType == 'vtxMassCorr_IVF' or vtxMassType == 'incVtxMass':
   jetSVTcut = '(' + jetSVTcut + '&& (Jet_vtxCat_IVF[' + jetIdx + '] == 0))'
 jetCut = '((' + jetIdx + ' >=0) && (Jet_pt[' + jetIdx + '] > 30 && abs(Jet_eta[' + jetIdx + ']) < 2.4) && ' + jetSVTcut + ')'
-lepCut = '(vLeptons_new_pt[0] > 20 && vLeptons_new_pt[1] > 20 && abs(vLeptons_new_eta[0]) < 2.4 && abs(vLeptons_new_eta[1]) < 2.4 && vLeptons_new_pfRelIso04[0] < 0.25 && vLeptons_new_pfRelIso04[1] < 0.25)'
+lepCut_Zee = '(vLeptons_new_pt[0] > 20 && vLeptons_new_pt[1] > 20 && abs(vLeptons_new_eta[0]) < 2.4 && abs(vLeptons_new_eta[1]) < 2.4 && vLeptons_new_pfRelIso03[0] < 0.25 && vLeptons_new_pfRelIso03[1] < 0.25 && (abs(vLeptons_new_etaSc[0]) < 1.4442 || abs(vLeptons_new_etaSc[0]) > 1.566) && (abs(vLeptons_new_etaSc[1]) < 1.4442 || abs(vLeptons_new_etaSc[1]) > 1.566))'
+lepCut_Zmm = '(vLeptons_new_pt[0] > 20 && vLeptons_new_pt[1] > 20 && abs(vLeptons_new_eta[0]) < 2.4 && abs(vLeptons_new_eta[1]) < 2.4 && vLeptons_new_pfRelIso04[0] < 0.25 && vLeptons_new_pfRelIso04[1] < 0.25)'
 zjetMassCut = '((VHbb::HVMass(vLeptons_new_pt[0],vLeptons_new_eta[0],vLeptons_new_phi[0],vLeptons_new_mass[0],vLeptons_new_pt[1],vLeptons_new_eta[1],vLeptons_new_phi[1],vLeptons_new_mass[1]) > 70) && (VHbb::HVMass(vLeptons_new_pt[0],vLeptons_new_eta[0],vLeptons_new_phi[0],vLeptons_new_mass[0],vLeptons_new_pt[1],vLeptons_new_eta[1],vLeptons_new_phi[1],vLeptons_new_mass[1]) < 110))'
 metCut = '(met_pt < 40)'
 #metCut = '(1)'
@@ -96,6 +99,8 @@ sf_com = 'sign(genWeight)*puWeight'
 sf_chan = {'Zmm': sf_com + '*muweight[0]*bTagWeight_CSVM[0]', 'Zee': sf_com + '*eleweight[0]*bTagWeight_CSVM[0]'}
 if csvCut == 'CSVT': 
   sf_chan = {'Zmm': sf_com + '*muweight[0]*bTagWeight_CSVT[0]', 'Zee': sf_com + '*eleweight[0]*bTagWeight_CSVT[0]'}
+if csvCut == 'CtagT': 
+  sf_chan = {'Zmm': sf_com + '*muweight[0]*cTagWeight_CSVT[0]', 'Zee': sf_com + '*eleweight[0]*cTagWeight_CSVT[0]'}
 
 #sf_chan = ['(1)', '(1)']
 
@@ -166,12 +171,11 @@ for chan in channels:
   print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
   
   #@@@@@@@@@@@final cuts@@@@@@@@@@
-  Zll_cut = lepCut
+  Zll_cut = ""
   if chan == 'Zmm':
-    Zll_cut = '((Vtype_new == 0) && ' + Zll_cut + ')'
-
+    Zll_cut = '((Vtype_new == 0) && ' + lepCut_Zmm + ')'
   if chan == 'Zee':
-    Zll_cut = '((Vtype_new == 1) && ' + Zll_cut + ')'
+    Zll_cut = '((Vtype_new == 1) && ' + lepCut_Zee + ')'
   
   
   #hC = {'DY':[], 'TT':[], 'WW':[], 'WZ':[], 'ZZ':[]}
@@ -299,7 +303,7 @@ for chan in channels:
       h[sample].append(getHisto(fName, lName, axis, var, lCut, str(samples[sample][3]) + '*' + sf))
       
       if syst == 'Central':
-        sfTmp = sf.replace('*bTagWeight_CSVT[0]','').replace('*bTagWeight_CSVM[0]','')
+        sfTmp = sf.replace('*bTagWeight_CSVT[0]','').replace('*bTagWeight_CSVM[0]','').replace('*cTagWeight_CSVM[0]','').replace('*cTagWeight_CSVM[1]','') #use for inclusive, no tagging weights
         varTmp = replace_for_list(var,jetIdx,'0')
         bCutTmp = bCut.replace(jetSVTcut,'(1)').replace(jetIdx,'0')
         cCutTmp = cCut.replace(jetSVTcut,'(1)').replace(jetIdx,'0')

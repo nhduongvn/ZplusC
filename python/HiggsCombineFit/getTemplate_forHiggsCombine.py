@@ -304,24 +304,44 @@ def removeHighUncBins(hIns): #[0]: syst, [1]: central
 
 #fIn = TFile.Open('Test/testTemplate_inverseCSVM_G_useLeadingJetPt_V25.root','read')
 #fOut = TFile.Open('Test/forRoofit_inverseCSVM_useLeadingJetPt.root','recreate')
+tagName = 'CSVM' #CSVM CtagT
 useDDbjet = True 
 useDDljet = True
-fIn = TFile.Open('../Test/template_vtxMass_CSVM_pt20_DY_allData_allWeight_V25.root','read')
-fIn_emu = TFile.Open('../Test/template_vtxMass_CSVM_emu_allData_V25.root','read')
-fIn_ttsemi = TFile.Open('../Test/template_vtxMass_CSVM_ttsemi_allData_V25.root','read')
-fIn_Wjet = TFile.Open('../Test/template_CSVv2_deepCSV_vtxMass_CSVM_Wjet_allData_V25.root') #need to rerun to get JEC up
+fIn = TFile.Open('../Test/template_vtxMass_'+tagName+'_pt20_noGapEle_DY_allData_allWeight_V25.root','read')
+fIn_emu = TFile.Open('../Test/template_vtxMass_'+tagName+'_emu_allData_V25.root','read')
+fIn_ttsemi = TFile.Open('../Test/template_vtxMass_'+tagName+'_ttsemi_allData_V25.root','read')
+fIn_Wjet_name = 'template_CSVv2_deepCSV_vtxMass_'+tagName+'_iso0p05_Wjet_allData_V25.root'
+if tagName == 'CtagT':
+  fIn_Wjet_name = 'template_deepCSV_vtxMass_'+tagName+'_iso0p05_Wjet_allData_V25.root'
 
-#fIn = TFile.Open('Test/forHiggsCombine_CSVM_useLeadingJetPt.root','read')
+fIn_Wjet = TFile.Open('../Test/'+fIn_Wjet_name) #need to rerun to get JEC up
+
+#fIn = TFile.Open('Test/forHiggsCombine_'+tagName+'_useLeadingJetPt.root','read')
 #write_data_card('test',fIn)
 
 temp_name = "vtxMass"
 xRange = [0,6] #[-1,-1] for unchange range
 #xDiv = [0.0, 0.4 , 0.6 , 0.8 , 1.0 , 1.2 , 1.4 , 1.6 , 1.8 , 2.0 , 2.2 , 2.4 , 2.6 , 2.8 , 3.0 , 3.2 , 3.4 , 3.6 , 3.8 , 4.0 , 4.2 , 4.4 , 4.6 , 4.8 , 5.0, 6.0] #[-1,-1] for unchange
-xDiv = [0.0, 0.4 , 0.6 , 0.8 , 1.0 , 1.2 , 1.4 , 1.6 , 1.8 , 2.0 , 2.2 , 2.4 , 2.6 , 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0, 4.2, 4.4, 4.6, 4.8, 5.0, 6.0] #[-1,-1] for unchange
+#xDiv = [0.0, 0.4 , 0.6 , 0.8 , 1.0 , 1.2 , 1.4 , 1.6 , 1.8 , 2.0 , 2.2 , 2.4 , 2.6 , 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0, 4.2, 4.4, 4.6, 4.8, 5.0, 6.0] #[-1,-1] for unchange
+xDiv = [0.0, 0.4 , 0.6 , 0.8 , 1.0 , 1.2 , 1.4 , 1.6 , 1.8 , 2.0 , 2.2 , 2.4 , 2.6 , 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0, 4.2, 4.4, 4.6, 4.8, 5.0, 5.4, 6.0] #[-1,-1] for unchange
 nRebin = 1 #Set nRebin = 1 when using custom binning
+#xDiv = [-1,-1]
+#nRebin = 2
+dc_name_pre = 'test_vtxMass_'+tagName+'_pt20_noGapEle_allData_binStatThresh_0'
+fOut_name_pre = '../Test/forHiggsCombine_vtxMass_'+tagName+'_pt20_noGapEle_DY_allData_allWeight_V25_binStatThresh_0'
 
-dc_name_pre = 'test_vtxMass_pt20_allData_binStatThresh_0'
-fOut_name_pre = '../Test/forHiggsCombine_vtxMass_CSVM_pt20_DY_allData_allWeight_V25_binStatThresh_0'
+
+##########################
+#start to do something
+##########################
+print '#######################################'
+print "Input histogram file: "
+print "Data, bkgr and MC template(s): ", fIn.GetName()
+if useDDbjet:
+  print "b-jet data-driven template: ", fIn_emu.GetName()
+if useDDljet:
+  print "l-jet data-driven template: ", fIn_Wjet.GetName()
+print '#######################################'
 
 if useDDbjet:
   dc_name_pre = dc_name_pre + '_useDDbjet'
@@ -344,7 +364,7 @@ else:
   fOut_name_pre = fOut_name_pre + '_nRebin_' + str(nRebin)
 
 
-#fOut_name_pre = '../Test/forHiggsCombine_vtxMassCorr_IVF_CSVM_DY_allData_allWeight_V25'
+#fOut_name_pre = '../Test/forHiggsCombine_vtxMassCorr_IVF_'+tagName+'_DY_allData_allWeight_V25'
 
 chans = ['Zee','Zmm']
 

@@ -71,8 +71,9 @@ def PtReweight(h2D, hRat):
 lumi = 35862. 
 
 csvCut = 'CSVM'
+#csvCut = 'CtagT'
+
 vtxMassType = 'vtxMass' #incVtxMass, vtxMassCorr_IVF
-#csvCut = '_CSVT'
 
 
 fOut = ROOT.TFile.Open('Test/template_' + vtxMassType + '_' + csvCut + '_ttsemi_allData_V25.root','recreate')
@@ -98,6 +99,9 @@ if vtxMassType == 'vtxMassCorr_IVF':
 if csvCut == 'CSVM':
   idxJet = idxJet.replace('[0]','[1]')
 
+if csvCut == 'CtagT':
+  idxJet = 'idxJet_passCtag_SVT[0]'
+
 #jsonCut = '(json == 1)'
 jsonCut = '(1)'
 triggerCut = '((HLT_BIT_HLT_IsoMu22_v == 1) || (HLT_BIT_HLT_IsoTkMu22_v == 1) || (HLT_BIT_HLT_IsoMu24_v == 1) || (HLT_BIT_HLT_IsoTkMu24_v == 1))' 
@@ -114,6 +118,9 @@ jetCut2 = '(Jet_pt[ttsemi_idxJet_sortWjetCSV[0]] > 30 && abs(Jet_eta[ttsemi_idxJ
 jetCut3 = '(Jet_btagCSV[ttsemi_idxJet_sortWjetCSV[0]] > 0.9535 && Jet_btagCSV[ttsemi_idxJet_sortWjetCSV[1]] > 0.9535 && Jet_btagCSV[ttsemi_idxJet_sortWjetCSV[2]] > 0.8484 && Jet_btagCSV[ttsemi_idxJet_sortWjetCSV[3]] < 0.546)'
 
 jetCut4 = '(' + jetVtxMassVar + '[ttsemi_idxJet_sortWjetCSV[2]] > 0)'
+
+if csvCut == 'CtagT':
+  jetCut3 = '(Jet_btagCSV[ttsemi_idxJet_sortWjetCSV[0]] > 0.9535 && Jet_btagCSV[ttsemi_idxJet_sortWjetCSV[1]] > 0.9535 && Jet_ctagVsL[ttsemi_idxJet_sortWjetCSV[2]] > 0.69 && Jet_ctagVsB[ttsemi_idxJet_sortWjetCSV[2]] > -0.45 && Jet_btagCSV[ttsemi_idxJet_sortWjetCSV[3]] < 0.546)'
 
 ttsemiCut = 'ttsemi_massChi2 < 1500'
 
@@ -135,6 +142,10 @@ sf_DY = 'muweight[0]*bTagWeight_CSVT[0]'
 if csvCut == 'CSVM':
   sf = 'ttsemiweight[0]*bTagWeight_CSVM[0]'
   sf_DY = 'muweight[0]*bTagWeight_CSVM[0]'
+
+if csvCut == 'CtagT':
+  sf = 'ttsemiweight[0]*cTagWeight_CSVT[0]'
+  sf_DY = 'muweight[0]*cTagWeight_CSVT[0]'
 
 #@@@@@@@@@@@final cuts@@@@@@@@@@
 cut = triggerCut + '&&' + lepCut + '&&' + ttsemiCut + '&&' + jetCut1 + '&&' + jetCut2 + '&&' + jetCut3 + '&&' + jetCut4 

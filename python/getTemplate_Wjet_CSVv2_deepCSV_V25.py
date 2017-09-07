@@ -75,30 +75,36 @@ def PtReweight(h2D, hRat):
 lumi = 35862. 
 #lumi = 1. 
 
-csvCut = 'CSVM'
+tagName = 'CSVM' #CSVM,CTagT
+
 csvCut_val = '0.8484'
 
-#csvCut = '_CSVT'
+#tagName = '_CSVT'
 
 vtxMassType = 'vtxMass' # vtxMass, incVtxMass, vtxMassCorr_IVF
+fOutName = 'Test/template_CSVv2_deepCSV_' + vtxMassType + '_' + tagName + '_iso0p05_Wjet_allData_V25.root'
+if tagName == 'CtagT':
+  fOutName = 'Test/template_deepCSV_' + vtxMassType + '_' + tagName + '_iso0p05_Wjet_allData_V25.root'
 
-fOut = ROOT.TFile.Open('Test/template_CSVv2_deepCSV_' + vtxMassType + '_' + csvCut + '_iso0p05_Wjet_allData_V25.root','recreate')
-
+fOut = ROOT.TFile.Open(fOutName,'recreate')
 ROOT.gSystem.Load('../interface/VHbbNameSpace_h.so')
-
-jetVtxMassVar = 'Jet_' + vtxMassType 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Cuts and corrections and scale factors
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+jetVtxMassVar = 'Jet_' + vtxMassType 
+
 idxJet = 'idxJet_passCSV_SVT[0]'
 if vtxMassType == 'incVtxMass':
   idxJet = 'idxJet_passCSV_SVT_1[0]'
 if vtxMassType == 'vtxMassCorr_IVF':
   idxJet = 'idxJet_passCSV_SVT_2[0]'
 
-if csvCut == 'CSVM':
+if tagName == 'CSVM':
   idxJet = idxJet.replace('[0]','[1]')
+
+if tagName == 'CtagT':
+  idxJet = 'idxJet_passCtag_SVT[0]'
 
 jetPt = 'Jet_pt[' + idxJet + ']'
 
@@ -110,10 +116,12 @@ lepCut = '(Vtype_new == 2 && (vLeptons_new_pt[0] > 25 && abs(vLeptons_new_eta[0]
 MTmassCut = '(VHbb::MTmass(vLeptons_new_pt[0],vLeptons_new_phi[0],met_pt, met_phi) > 50)'
 #MTmassCut = '(1)'
 jetCut = '((' + idxJet + '>= 0) && ' + jetPt + ' > 30 && abs(Jet_eta[' + idxJet + ']) < 2.4 && Jet_btagCSV[' + idxJet + '] > ' + csvCut_val + ' && Jet_btagDeepCSVdusg[' + idxJet + '] >= 0.05 && Jet_vtxCat_IVF[' +idxJet + '] == 0 && ' + jetVtxMassVar + '[' + idxJet + '] > 0)'
+if tagName == 'CtagT':
+  jetCut = '((' + idxJet + '>= 0) && ' + jetPt + ' > 30 && abs(Jet_eta[' + idxJet + ']) < 2.4 && (Jet_ctagVsL[' + idxJet + '] > 0.69 && Jet_ctagVsB[' + idxJet + '] > -0.45) && Jet_btagDeepCSVdusg[' + idxJet + '] >= 0.05 && Jet_vtxCat_IVF[' +idxJet + '] == 0 && ' + jetVtxMassVar + '[' + idxJet + '] > 0)'
 
-if vtxMassType == 'vtxMass' or vtxMassType == 'incVtxMass':
-  jetCut = jetCut.replace('Jet_vtxCat_IVF[0] == 0','(1)')
-  jetCut = jetCut.replace('Jet_vtxCat_IVF[0]==0','(1)')
+if vtxMassType == 'vtxMass':
+  jetCut = jetCut.replace('Jet_vtxCat_IVF['+idxJet+'] == 0','(1)')
+  jetCut = jetCut.replace('Jet_vtxCat_IVF['+idxJet+']==0','(1)')
 
 #nJetCut = '(Sum$(Jet_pt > 25 && abs(Jet_eta) < 2.4) < 100)'
 nJetCut = '(1)'
@@ -131,14 +139,18 @@ massCut_DY = '((VHbb::HVMass(vLeptons_new_pt[0],vLeptons_new_eta[0],vLeptons_new
 metCut_DY = '(met_pt < 40)'
 
 ###########scale factor###############
-sf = 'sign(genWeight)*puWeight*emuweight_trig[0]*emuweight[0]*bTagWeight_CSVT[0]'
-sf_DY = 'sign(genWeight)*puWeight*muweight_trig[0]*muweight[0]*bTagWeight_CSVT[0]'
+#sf = 'sign(genWeight)*puWeight*emuweight_trig[0]*emuweight[0]*bTagWeight_CSVT[0]'
+#sf_DY = 'sign(genWeight)*puWeight*muweight_trig[0]*muweight[0]*bTagWeight_CSVT[0]'
 
+#TODO: add trigger, trk, ID weight for single electron event
 sf = 'bTagWeight_CSVT[0]'
 sf_DY = 'muweight[0]*bTagWeight_CSVT[0]'
-if csvCut == 'CSVM':
+if tagName == 'CSVM':
   sf = 'bTagWeight_CSVM[0]'
   sf_DY = 'muweight[0]*bTagWeight_CSVM[0]'
+if tagName == 'CtagT':
+  sf = 'cTagWeight_CSVT[0]'
+  sf_DY = 'muweight[0]*cTagWeight_CSVT[0]'
 
 #@@@@@@@@@@@final cuts@@@@@@@@@@
 cut = triggerCut + '&&' + lepCut + '&&' + jetCut + '&&' + metCut + '&&' + MTmassCut + '&&' + nJetCut

@@ -306,14 +306,23 @@ def removeHighUncBins(hIns): #[0]: syst, [1]: central
 #fOut = TFile.Open('Test/forRoofit_inverseCSVM_useLeadingJetPt.root','recreate')
 tagName = 'CSVM' #CSVM CtagT
 useDDbjet = True 
-useDDljet = True
-fIn = TFile.Open('../Test/template_vtxMass_'+tagName+'_pt20_noGapEle_DY_allData_allWeight_V25.root','read')
-fIn_emu = TFile.Open('../Test/template_vtxMass_'+tagName+'_emu_allData_V25.root','read')
-fIn_ttsemi = TFile.Open('../Test/template_vtxMass_'+tagName+'_ttsemi_allData_V25.root','read')
+useDDljet = False 
+useDY_nlo = False 
+
+fIn_name = '../Test/template_vtxMass_'+tagName+'_pt20_noGapEle_DY_allData_allWeight_V25.root'
+if useDY_nlo:
+    fIn_name = fIn_name.replace('DY','DY_nlo_1')
+
+fIn_emu_name = '../Test/template_vtxMass_'+tagName+'_lep_pt_25_emu_allData_V25.root'
+fIn_ttsemi_name = '../Test/template_vtxMass_'+tagName+'_ttsemi_allData_V25.root' #not use currently, TODO: data-driven cjet msv
+
 fIn_Wjet_name = 'template_CSVv2_deepCSV_vtxMass_'+tagName+'_iso0p05_Wjet_allData_V25.root'
 if tagName == 'CtagT':
   fIn_Wjet_name = 'template_deepCSV_vtxMass_'+tagName+'_iso0p05_Wjet_allData_V25.root'
 
+fIn = TFile.Open(fIn_name,'read')
+fIn_emu = TFile.Open(fIn_emu_name,'read')
+fIn_ttsemi = TFile.Open(fIn_ttsemi_name,'read')
 fIn_Wjet = TFile.Open('../Test/'+fIn_Wjet_name) #need to rerun to get JEC up
 
 #fIn = TFile.Open('Test/forHiggsCombine_'+tagName+'_useLeadingJetPt.root','read')
@@ -329,6 +338,10 @@ nRebin = 1 #Set nRebin = 1 when using custom binning
 #nRebin = 2
 dc_name_pre = 'test_vtxMass_'+tagName+'_pt20_noGapEle_allData_binStatThresh_0'
 fOut_name_pre = '../Test/forHiggsCombine_vtxMass_'+tagName+'_pt20_noGapEle_DY_allData_allWeight_V25_binStatThresh_0'
+
+if useDY_nlo:
+    dc_name_pre = dc_name_pre.replace('_allData_','_DY_nlo_1_allData_')
+    fOut_name_pre = fOut_name_pre.replace('_DY_','_DY_nlo_1_')
 
 
 ##########################
